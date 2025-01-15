@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const port = process.env.PORT || 5000;
 const app = express();
-
+const jwt = require('jsonwebtoken');
 const corsOptions = {
   origin: ['http://localhost:5173'],
   Credential: true,
@@ -12,7 +12,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(cors());
 app.use(express.json());
-
 
 app.get('/', (req, res) => {
   res.send('Hello World');
@@ -39,8 +38,18 @@ async function run() {
     const db = client.db('eduSphere');
     const usersCollection = db.collection('users');
 
+    // jwt related functionality
+    app.post('/jwt', async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: '350d',
+      });
+      res.send({ token });
+    });
+
     // save a new user in db
     app.post('/users/:email', async (req, res) => {
+      const { email } = req.params;
       const query = { email };
       const user = req.body;
       // check if the user already exist in db
@@ -54,6 +63,7 @@ async function run() {
       });
       res.send(result);
     });
+
     await client.connect();
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
