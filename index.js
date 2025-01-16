@@ -49,18 +49,18 @@ async function run() {
 
     // middlewares
     const verifyToken = (req, res, next) => {
-      if(!req.headers.authorization) {
-        return res.status(401).send({message: 'unauthorized access'})
+      if (!req.headers.authorization) {
+        return res.status(401).send({ message: 'unauthorized access' });
       }
-      const token  = req.headers.authorization.split(' ')[1];
+      const token = req.headers.authorization.split(' ')[1];
       jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-        if(err){
-          return res.status(401).send({message: 'unauthorized access'})
+        if (err) {
+          return res.status(401).send({ message: 'unauthorized access' });
         }
         req.decoded = decoded;
-        next()
-      })
-    }
+        next();
+      });
+    };
 
     // save a new user in db
     app.post('/users/:email', async (req, res) => {
@@ -84,6 +84,12 @@ async function run() {
       const role = req.params.role;
       const query = { role: role };
       const result = await usersCollection.find(query).toArray();
+      res.send(result);
+    });
+
+    // get user data
+    app.get('/users',verifyToken, async (req, res) => {
+      const result = await usersCollection.find().toArray();
       res.send(result);
     });
 
