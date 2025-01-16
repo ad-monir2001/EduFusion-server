@@ -64,13 +64,20 @@ async function run() {
       res.send(result);
     });
 
-    // get tutor data 
-    app.get('/users/:role', async(req,res) => {
+    // get tutor data
+    app.get('/users/:role', async (req, res) => {
       const role = req.params.role;
-      const query = {role: role};
+      const query = { role: role };
       const result = await usersCollection.find(query).toArray();
-      res.send(result)
-    })
+      res.send(result);
+    });
+
+    // get users role
+    app.get('/users/role/:email', async (req, res) => {
+      const email = req.params.email;
+      const result = await usersCollection.findOne({ email });
+      res.send({ role: result?.role });
+    });
 
     await client.connect();
     // Send a ping to confirm a successful connection
