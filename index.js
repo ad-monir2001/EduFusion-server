@@ -64,6 +64,14 @@ async function run() {
       res.send(result);
     });
 
+    // get tutor data 
+    app.get('/users/:role', async(req,res) => {
+      const role = req.params.role;
+      const query = {role: role};
+      const result = await usersCollection.find(query).toArray();
+      res.send(result)
+    })
+
     await client.connect();
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });
