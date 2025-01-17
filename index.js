@@ -95,7 +95,7 @@ async function run() {
     // update a user to admin || tutor || student
     app.patch('/users/role/:id', async (req, res) => {
       const id = req.params.id;
-      const {role} = req.body;
+      const { role } = req.body;
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
         $set: {
@@ -103,6 +103,17 @@ async function run() {
         },
       };
       const result = await usersCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    });
+
+    // search a user by name
+    app.get('/search', async (req, res) => {
+      const searchText = req.query.searchText;
+      const query = {
+        $or: [{ name: { $regex: searchText, $options: 'i' } }],
+      };
+
+      const result = await usersCollection.find(query).toArray();
       res.send(result);
     });
 
