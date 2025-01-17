@@ -93,12 +93,13 @@ async function run() {
     });
 
     // update a user to admin || tutor || student
-    app.patch('/users/admin/:id', async (req, res) => {
+    app.patch('/users/role/:id', async (req, res) => {
       const id = req.params.id;
+      const {role} = req.body;
       const filter = { _id: new ObjectId(id) };
       const updatedDoc = {
         $set: {
-          role: 'admin',
+          role: role,
         },
       };
       const result = await usersCollection.updateOne(filter, updatedDoc);
