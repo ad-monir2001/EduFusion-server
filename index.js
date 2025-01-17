@@ -6,11 +6,10 @@ const app = express();
 const jwt = require('jsonwebtoken');
 const corsOptions = {
   origin: ['http://localhost:5173'],
-  Credential: true,
+  credentials: true,
   optionSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
-app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -20,7 +19,7 @@ app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.8mt9x.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -88,8 +87,21 @@ async function run() {
     });
 
     // get user data
-    app.get('/users',verifyToken, async (req, res) => {
+    app.get('/users', verifyToken, async (req, res) => {
       const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    // update a user to admin || tutor || student
+    app.patch('/users/admin/:id', async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: 'admin',
+        },
+      };
+      const result = await usersCollection.updateOne(filter, updatedDoc);
       res.send(result);
     });
 
