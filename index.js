@@ -5,7 +5,7 @@ const port = process.env.PORT || 5000;
 const app = express();
 const jwt = require('jsonwebtoken');
 const corsOptions = {
-  origin: ['http://localhost:5173'],
+  origin: ['http://localhost:5173', 'https://edufusion-f285c.web.app'],
   credentials: true,
   optionSuccessStatus: 200,
 };
@@ -142,6 +142,14 @@ async function run() {
     // get study session data for admin and all
     app.get('/session', async (req, res) => {
       const result = await sessionCollection.find().toArray();
+      res.send(result);
+    });
+
+    // delete session data
+    app.delete('/session/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await sessionCollection.deleteOne(query);
       res.send(result);
     });
 
