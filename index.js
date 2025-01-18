@@ -36,6 +36,7 @@ async function run() {
     // collections in the database
     const db = client.db('eduSphere');
     const usersCollection = db.collection('users');
+    const sessionCollection = db.collection('session');
 
     // jwt related functionality
     app.post('/jwt', async (req, res) => {
@@ -122,6 +123,20 @@ async function run() {
       const email = req.params.email;
       const result = await usersCollection.findOne({ email });
       res.send({ role: result?.role });
+    });
+
+    // create new session by tutor
+    app.post('/session', async (req, res) => {
+      const data = req.body;
+      const result = await sessionCollection.insertOne(data);
+      res.send(result);
+    });
+
+    // get study session data
+    app.get('/session/:email', async (req, res) => {
+      const email = req.params.email;
+      const result = await sessionCollection.find(email).toArray();
+      res.send(result);
     });
 
     await client.connect();
