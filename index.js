@@ -132,10 +132,16 @@ async function run() {
       res.send(result);
     });
 
-    // get study session data
+    // get study session data for specific tutors
     app.get('/session/:email', async (req, res) => {
       const email = req.params.email;
-      const result = await sessionCollection.find({email: email }).toArray();
+      const result = await sessionCollection.find({ email: email }).toArray();
+      res.send(result);
+    });
+
+    // get study session data for admin and all
+    app.get('/session', async (req, res) => {
+      const result = await sessionCollection.find().toArray();
       res.send(result);
     });
 
