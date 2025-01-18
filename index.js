@@ -135,7 +135,7 @@ async function run() {
     // get study session data
     app.get('/session/:email', async (req, res) => {
       const email = req.params.email;
-      const result = await sessionCollection.find(email).toArray();
+      const result = await sessionCollection.find({email: email }).toArray();
       res.send(result);
     });
 
