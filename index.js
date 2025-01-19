@@ -37,6 +37,7 @@ async function run() {
     const db = client.db('eduSphere');
     const usersCollection = db.collection('users');
     const sessionCollection = db.collection('session');
+    const materialCollection = db.collection('materials');
 
     // jwt related functionality
     app.post('/jwt', async (req, res) => {
@@ -162,6 +163,13 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await sessionCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // upload material for specific session
+    app.post('/materials', async (req, res) => {
+      const data = req.body;
+      const result = await materialCollection.insertOne(data);
       res.send(result);
     });
 
