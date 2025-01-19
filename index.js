@@ -173,6 +173,22 @@ async function run() {
       const result = await materialCollection.insertOne(data);
       res.send(result);
     });
+
+    // get materials data
+    app.get('/materials/:email', async (req, res) => {
+      const email = req.params.email;
+      const result = await materialCollection.find({ email: email }).toArray();
+      res.send(result);
+    });
+
+    // delete material data
+    app.delete('/materials/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await materialCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // update notes
     app.patch('/notes/:id', async (req, res) => {
       const id = req.params.id;
