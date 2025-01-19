@@ -173,6 +173,17 @@ async function run() {
       const result = await materialCollection.insertOne(data);
       res.send(result);
     });
+    // update notes
+    app.patch('/notes/:id', async (req, res) => {
+      const id = req.params.id;
+      const updatedData = req.body;
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $set: updatedData,
+      };
+      const result = await noteCollection.updateOne(query, update);
+      res.send(result);
+    });
 
     // create note for student
     app.post('/notes', async (req, res) => {
@@ -185,6 +196,14 @@ async function run() {
     app.get('/notes/:email', async (req, res) => {
       const email = req.params.email;
       const result = await noteCollection.find({ email: email }).toArray();
+      res.send(result);
+    });
+
+    // delete a note
+    app.delete('/notes/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await noteCollection.deleteOne(query);
       res.send(result);
     });
 
