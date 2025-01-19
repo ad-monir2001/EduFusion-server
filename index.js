@@ -64,6 +64,36 @@ async function run() {
       });
     };
 
+    // verify admin middleware
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const result = await usersCollection.findOne(query);
+      if (!result || result?.role !== 'admin')
+        return res.status(403).send({ message: 'Forbidden ! Admin Only' });
+      next();
+    };
+
+    // verify Tutor middleware
+    const verifyTutor = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const result = await usersCollection.findOne(query);
+      if (!result || result?.role !== 'tutor')
+        return res.status(403).send({ message: 'Forbidden ! Tutor Only' });
+      next();
+    };
+
+    // verify Student middleware
+    const verifyStudent = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email };
+      const result = await usersCollection.findOne(query);
+      if (!result || result?.role !== 'student')
+        return res.status(403).send({ message: 'Forbidden ! Student Only' });
+      next();
+    };
+
     // save a new user in db
     app.post('/users/:email', async (req, res) => {
       const { email } = req.params;
@@ -90,7 +120,7 @@ async function run() {
     });
 
     // get user data
-    app.get('/users', verifyToken, async (req, res) => {
+    app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
       const result = await usersCollection.find().toArray();
       res.send(result);
     });
