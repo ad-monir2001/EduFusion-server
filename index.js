@@ -145,6 +145,18 @@ async function run() {
       res.send(result);
     });
 
+    // update session status to approved
+    app.patch('/session/:id', async (req, res) => {
+      const id = req.params.id;
+      const updatedData = req.body;
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $set: updatedData,
+      };
+      const result = await sessionCollection.updateOne(query, update);
+      res.send(result);
+    });
+
     // delete session data
     app.delete('/session/:id', async (req, res) => {
       const id = req.params.id;
