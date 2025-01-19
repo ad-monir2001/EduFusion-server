@@ -38,6 +38,7 @@ async function run() {
     const usersCollection = db.collection('users');
     const sessionCollection = db.collection('session');
     const materialCollection = db.collection('materials');
+    const noteCollection = db.collection('notes');
 
     // jwt related functionality
     app.post('/jwt', async (req, res) => {
@@ -170,6 +171,20 @@ async function run() {
     app.post('/materials', async (req, res) => {
       const data = req.body;
       const result = await materialCollection.insertOne(data);
+      res.send(result);
+    });
+
+    // create note for student
+    app.post('/notes', async (req, res) => {
+      const data = req.body;
+      const result = await noteCollection.insertOne(data);
+      res.send(result);
+    });
+
+    // get note data
+    app.get('/notes/:email', async (req, res) => {
+      const email = req.params.email;
+      const result = await noteCollection.find({ email: email }).toArray();
       res.send(result);
     });
 
