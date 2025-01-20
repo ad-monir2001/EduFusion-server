@@ -227,6 +227,18 @@ async function run() {
       res.send(result);
     });
 
+    // update materials
+    app.patch('/materials/:id', async (req, res) => {
+      const id = req.params.id;
+      const updatedData = req.body;
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $set: updatedData,
+      };
+      const result = await materialCollection.updateOne(query, update);
+      res.send(result);
+    });
+
     // update notes
     app.patch('/notes/:id', async (req, res) => {
       const id = req.params.id;
