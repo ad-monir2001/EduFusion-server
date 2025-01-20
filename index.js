@@ -283,6 +283,16 @@ async function run() {
     // booked session store data
     app.post('/bookedSession', async (req, res) => {
       const data = req.body;
+      const { sessionId, studentEmail } = data;
+      const existingBooking = await bookedSessionCollection.findOne({
+        sessionId,
+        studentEmail,
+      });
+      if (existingBooking) {
+        return res
+          .status(400)
+          .send({ message: 'You have already booked this session.' });
+      }
       const result = await bookedSessionCollection.insertOne(data);
       res.send(result);
     });
