@@ -140,13 +140,21 @@ async function run() {
     });
 
     // search a user by name
-    app.get('/search', async (req, res) => {
-      const searchText = req.query.searchText;
+    app.get('/users', async (req, res) => {
+      const searchText = req.query.searchText || '';
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+
       const query = {
         $or: [{ name: { $regex: searchText, $options: 'i' } }],
       };
 
-      const result = await usersCollection.find(query).toArray();
+      const result = await usersCollection
+        .find(query)
+        .skip(skip)
+        .limit(limit)
+        .toArray();
       res.send(result);
     });
 
