@@ -39,6 +39,7 @@ async function run() {
     const sessionCollection = db.collection('session');
     const materialCollection = db.collection('materials');
     const noteCollection = db.collection('notes');
+    const bookedSessionCollection = db.collection('bookedSession');
 
     // jwt related functionality
     app.post('/jwt', async (req, res) => {
@@ -276,6 +277,13 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await noteCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    // booked session store data
+    app.post('/bookedSession', async (req, res) => {
+      const data = req.body;
+      const result = await bookedSessionCollection.insertOne(data);
       res.send(result);
     });
 
