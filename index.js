@@ -219,6 +219,12 @@ async function run() {
       res.send(result);
     });
 
+    // get materials data for admin
+    app.get('/materials', async (req, res) => {
+      const result = await materialCollection.find().toArray();
+      res.send(result);
+    });
+
     // delete material data
     app.delete('/materials/:id', async (req, res) => {
       const id = req.params.id;
