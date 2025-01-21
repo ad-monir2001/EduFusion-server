@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const port = process.env.PORT || 5000;
 const app = express();
+const stripe = require('stripe')(process.env.PAYMENT_SECRET_KEY);
 const jwt = require('jsonwebtoken');
 const corsOptions = {
   origin: ['http://localhost:5173', 'https://edufusion-f285c.web.app'],
@@ -296,6 +297,19 @@ async function run() {
       const result = await bookedSessionCollection.insertOne(data);
       res.send(result);
     });
+
+    // payment process
+    app.post('/payment-intent/:price', async(req, res) => {
+      const sessionPrice = parseInt(req.params.price) * 100;
+      const {client_secret} = await stripe.paymentIntents.create({
+        amount: sessionPrice,
+        currency: 'usd',
+        automatic_payment_methods: {
+          enabled: true,
+        },
+      });
+      res.send({clientSecret: client_secret})
+    })
 
     await client.connect();
     // Send a ping to confirm a successful connection
