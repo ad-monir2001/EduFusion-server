@@ -123,10 +123,10 @@ async function run() {
     });
 
     // get user data
-    app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
-      const result = await usersCollection.find().toArray();
-      res.send(result);
-    });
+    // app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+    //   const result = await usersCollection.find().toArray();
+    //   res.send(result);
+    // });
 
     // update a user to admin || tutor || student
     app.patch('/users/role/:id', async (req, res) => {
@@ -143,22 +143,42 @@ async function run() {
     });
 
     // search a user by name
-    app.get('/users', async (req, res) => {
-      const searchText = req.query.searchText || '';
-      const page = parseInt(req.query.page) || 1;
-      const limit = parseInt(req.query.limit) || 10;
-      const skip = (page - 1) * limit;
-
-      const query = {
-        $or: [{ name: { $regex: searchText, $options: 'i' } }],
-      };
-
-      const result = await usersCollection
-        .find(query)
-        .skip(skip)
-        .limit(limit)
-        .toArray();
-      res.send(result);
+    
+    
+    app.get('/users',verifyToken,verifyAdmin, async (req, res) => {
+      try {
+        const searchText = req.query.searchText || '';
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+    
+        const query = searchText 
+        ? { 
+            $or: [
+              { name: { $regex: searchText, $options: 'i' } },
+              { email: { $regex: searchText, $options: 'i' } }
+            ]
+          }
+        : {};
+    
+        const [result, total] = await Promise.all([
+          usersCollection
+            .find(query)
+            .skip(skip)
+            .limit(limit)
+            .toArray(),
+          usersCollection.countDocuments(query)
+        ]);
+    
+        res.json({
+          users: result,
+          total,
+          page,
+          totalPages: Math.ceil(total / limit)
+        });
+      } catch (error) {
+        res.status(500).json({ message: 'Search failed', error: error.message });
+      }
     });
 
     // get users role
@@ -227,6 +247,29 @@ async function run() {
       const result = await materialCollection.find().toArray();
       res.send(result);
     });
+
+    // get material data for specific session id
+    app.get('/materials/:sessionId', async(req,res)=> {
+      const sessionId = req.params.sessionId;
+      console.log('Received  sessionId:', sessionId);
+      try {
+        const result = await materialCollection.find({sessionId: sessionId}).toArray();
+        console.log('Found materials:', result);
+        if (result.length === 0) {
+          return res.status(404).send('No materials found for this session');
+        }
+        res.send(result);
+      } catch (error) {
+        console.error('Error fetching materials:', error);
+        res.status(500).send('Server error');
+      }
+    });
+
+    // sessionId
+    
+
+    
+    
 
     // delete material data
     app.delete('/materials/:id', async (req, res) => {
