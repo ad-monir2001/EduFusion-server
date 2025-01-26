@@ -41,6 +41,7 @@ async function run() {
     const materialCollection = db.collection('materials');
     const noteCollection = db.collection('notes');
     const bookedSessionCollection = db.collection('bookedSession');
+    const reviewCollection = db.collection('reviews');
 
     // jwt related functionality
     app.post('/jwt', async (req, res) => {
@@ -267,7 +268,7 @@ async function run() {
     });
 
     // get note data
-    app.get('/notes/:email',verifyToken,verifyStudent, async (req, res) => {
+    app.get('/notes/:email', verifyToken, verifyStudent, async (req, res) => {
       const email = req.params.email;
       const result = await noteCollection.find({ email: email }).toArray();
       res.send(result);
@@ -304,6 +305,13 @@ async function run() {
       const result = await bookedSessionCollection
         .find({ studentEmail: email })
         .toArray();
+      res.send(result);
+    });
+
+    // reviews and ratings
+    app.post('/reviews', async (req, res) => {
+      const data = req.body;
+      const result = await reviewCollection.insertOne(data);
       res.send(result);
     });
 
