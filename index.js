@@ -267,7 +267,7 @@ async function run() {
     });
 
     // get note data
-    app.get('/notes/:email', async (req, res) => {
+    app.get('/notes/:email',verifyToken,verifyStudent, async (req, res) => {
       const email = req.params.email;
       const result = await noteCollection.find({ email: email }).toArray();
       res.send(result);
@@ -298,18 +298,27 @@ async function run() {
       res.send(result);
     });
 
+    // get booked session data
+    app.get('/bookedSession/:email', async (req, res) => {
+      const email = req.params.email;
+      const result = await bookedSessionCollection
+        .find({ studentEmail: email })
+        .toArray();
+      res.send(result);
+    });
+
     // payment process
-    app.post('/payment-intent/:price', async(req, res) => {
+    app.post('/payment-intent/:price', async (req, res) => {
       const sessionPrice = parseInt(req.params.price) * 100;
-      const {client_secret} = await stripe.paymentIntents.create({
+      const { client_secret } = await stripe.paymentIntents.create({
         amount: sessionPrice,
         currency: 'usd',
         automatic_payment_methods: {
           enabled: true,
         },
       });
-      res.send({clientSecret: client_secret})
-    })
+      res.send({ clientSecret: client_secret });
+    });
 
     await client.connect();
     // Send a ping to confirm a successful connection
