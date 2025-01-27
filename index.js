@@ -345,6 +345,23 @@ async function run() {
       res.send(result);
     });
 
+    // get reviews and ratings for specific session id for all user
+    app.get('/review/:sessionId', async (req, res) => {
+      const sessionId = req.params.sessionId;
+
+      try {
+        const result = await reviewCollection.find({ sessionId: sessionId })
+          .toArray();
+
+        if (result.length === 0) {
+          return res.status(404).send('No Reviews found for this session');
+        }
+        res.send(result);
+      } catch (error) {
+        res.status(500).send('Server error');
+      }
+    });
+
     // payment process
     app.post('/payment-intent/:price', async (req, res) => {
       const sessionPrice = parseInt(req.params.price) * 100;
