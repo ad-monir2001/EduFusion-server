@@ -114,7 +114,7 @@ async function run() {
       res.send(result);
     });
 
-    // get tutor data
+    // get role
     app.get('/users/:role', async (req, res) => {
       const role = req.params.role;
       const query = { role: role };
@@ -122,14 +122,8 @@ async function run() {
       res.send(result);
     });
 
-    // get user data
-    // app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
-    //   const result = await usersCollection.find().toArray();
-    //   res.send(result);
-    // });
-
     // update a user to admin || tutor || student
-    app.patch('/users/role/:id', async (req, res) => {
+    app.patch('/users/role/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const { role } = req.body;
       const filter = { _id: new ObjectId(id) };
@@ -186,14 +180,14 @@ async function run() {
     });
 
     // create new session by tutor
-    app.post('/session', async (req, res) => {
+    app.post('/session', verifyToken, verifyTutor, async (req, res) => {
       const data = req.body;
       const result = await sessionCollection.insertOne(data);
       res.send(result);
     });
 
     // get study session data for specific tutors
-    app.get('/session/:email', async (req, res) => {
+    app.get('/session/:email', verifyToken, verifyTutor, async (req, res) => {
       const email = req.params.email;
       const result = await sessionCollection.find({ email: email }).toArray();
       res.send(result);
@@ -206,7 +200,7 @@ async function run() {
     });
 
     // update session status to approved
-    app.patch('/session/:id', async (req, res) => {
+    app.patch('/session/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const updatedData = req.body;
       const query = { _id: new ObjectId(id) };
@@ -218,7 +212,7 @@ async function run() {
     });
 
     // delete session data
-    app.delete('/session/:id', async (req, res) => {
+    app.delete('/session/:id', verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await sessionCollection.deleteOne(query);
@@ -226,21 +220,21 @@ async function run() {
     });
 
     // upload material for specific session
-    app.post('/materials', async (req, res) => {
+    app.post('/materials', verifyToken, verifyTutor, async (req, res) => {
       const data = req.body;
       const result = await materialCollection.insertOne(data);
       res.send(result);
     });
 
     // get materials data
-    app.get('/materials/:email', async (req, res) => {
+    app.get('/materials/:email', verifyToken, verifyTutor, async (req, res) => {
       const email = req.params.email;
       const result = await materialCollection.find({ email: email }).toArray();
       res.send(result);
     });
 
     // get materials data for admin
-    app.get('/materials', async (req, res) => {
+    app.get('/materials', verifyToken, verifyAdmin, async (req, res) => {
       const result = await materialCollection.find().toArray();
       res.send(result);
     });
@@ -264,10 +258,8 @@ async function run() {
       }
     });
 
-    // sessionId
-
-    // delete material data
-    app.delete('/materials/:id', async (req, res) => {
+    // delete material data for admin and tutor
+    app.delete('/materials/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await materialCollection.deleteOne(query);
@@ -275,7 +267,7 @@ async function run() {
     });
 
     // update materials
-    app.patch('/materials/:id', async (req, res) => {
+    app.patch('/materials/:id',verifyToken,verifyTutor, async (req, res) => {
       const id = req.params.id;
       const updatedData = req.body;
       const query = { _id: new ObjectId(id) };
@@ -287,7 +279,7 @@ async function run() {
     });
 
     // update notes
-    app.patch('/notes/:id', async (req, res) => {
+    app.patch('/notes/:id', verifyToken, verifyStudent, async (req, res) => {
       const id = req.params.id;
       const updatedData = req.body;
       const query = { _id: new ObjectId(id) };
@@ -299,7 +291,7 @@ async function run() {
     });
 
     // create note for student
-    app.post('/notes', async (req, res) => {
+    app.post('/notes', verifyToken, verifyStudent, async (req, res) => {
       const data = req.body;
       const result = await noteCollection.insertOne(data);
       res.send(result);
@@ -313,7 +305,7 @@ async function run() {
     });
 
     // delete a note
-    app.delete('/notes/:id', async (req, res) => {
+    app.delete('/notes/:id', verifyToken, verifyStudent, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await noteCollection.deleteOne(query);
