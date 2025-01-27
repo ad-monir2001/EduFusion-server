@@ -241,7 +241,7 @@ async function run() {
 
     // get material data for specific session id
 
-    app.get('/material/:sessionId', async (req, res) => {
+    app.get('/material/:sessionId',verifyToken,verifyStudent, async (req, res) => {
       const sessionId = req.params.sessionId;
 
       try {
@@ -313,7 +313,7 @@ async function run() {
     });
 
     // booked session store data
-    app.post('/bookedSession', async (req, res) => {
+    app.post('/bookedSession',verifyToken,verifyStudent, async (req, res) => {
       const data = req.body;
       const { sessionId, studentEmail } = data;
       const existingBooking = await bookedSessionCollection.findOne({
@@ -330,7 +330,7 @@ async function run() {
     });
 
     // get booked session data
-    app.get('/bookedSession/:email', async (req, res) => {
+    app.get('/bookedSession/:email',verifyToken,verifyStudent, async (req, res) => {
       const email = req.params.email;
       const result = await bookedSessionCollection
         .find({ studentEmail: email })
@@ -339,7 +339,7 @@ async function run() {
     });
 
     // reviews and ratings
-    app.post('/reviews', async (req, res) => {
+    app.post('/reviews',verifyToken,verifyStudent, async (req, res) => {
       const data = req.body;
       const result = await reviewCollection.insertOne(data);
       res.send(result);
