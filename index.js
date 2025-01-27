@@ -137,14 +137,11 @@ async function run() {
     });
 
     // search a user by name
-
     app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
       try {
         const searchText = req.query.searchText || '';
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
-        const skip = (page - 1) * limit;
-
+    
+        // Build the query based on searchText
         const query = searchText
           ? {
               $or: [
@@ -153,24 +150,56 @@ async function run() {
               ],
             }
           : {};
-
-        const [result, total] = await Promise.all([
-          usersCollection.find(query).skip(skip).limit(limit).toArray(),
-          usersCollection.countDocuments(query),
-        ]);
-
+    
+        // Fetch all matching users without limit or pagination
+        const result = await usersCollection.find(query).toArray();
+    
+        // Respond with all users
         res.json({
           users: result,
-          total,
-          page,
-          totalPages: Math.ceil(total / limit),
+          total: result.length,
         });
       } catch (error) {
         res
           .status(500)
-          .json({ message: 'Search failed', error: error.message });
+          .json({ message: 'Failed to fetch users', error: error.message });
       }
     });
+    
+
+    // app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+    //   try {
+    //     const searchText = req.query.searchText || '';
+    //     const page = parseInt(req.query.page) || 1;
+    //     const limit = parseInt(req.query.limit);
+    //     const skip = (page - 1) * limit;
+
+    //     const query = searchText
+    //       ? {
+    //           $or: [
+    //             { name: { $regex: searchText, $options: 'i' } },
+    //             { email: { $regex: searchText, $options: 'i' } },
+    //           ],
+    //         }
+    //       : {};
+
+    //     const [result, total] = await Promise.all([
+    //       usersCollection.find(query).skip(skip).limit(limit).toArray(),
+    //       usersCollection.countDocuments(query),
+    //     ]);
+
+    //     res.json({
+    //       users: result,
+    //       total,
+    //       page,
+    //       totalPages: Math.ceil(total / limit),
+    //     });
+    //   } catch (error) {
+    //     res
+    //       .status(500)
+    //       .json({ message: 'Search failed', error: error.message });
+    //   }
+    // });
 
     // get users role
     app.get('/users/role/:email', async (req, res) => {
