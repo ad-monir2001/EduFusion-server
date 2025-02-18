@@ -140,7 +140,7 @@ async function run() {
     app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
       try {
         const searchText = req.query.searchText || '';
-    
+
         // Build the query based on searchText
         const query = searchText
           ? {
@@ -150,10 +150,10 @@ async function run() {
               ],
             }
           : {};
-    
+
         // Fetch all matching users without limit or pagination
         const result = await usersCollection.find(query).toArray();
-    
+
         // Respond with all users
         res.json({
           users: result,
@@ -165,41 +165,6 @@ async function run() {
           .json({ message: 'Failed to fetch users', error: error.message });
       }
     });
-    
-
-    // app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
-    //   try {
-    //     const searchText = req.query.searchText || '';
-    //     const page = parseInt(req.query.page) || 1;
-    //     const limit = parseInt(req.query.limit);
-    //     const skip = (page - 1) * limit;
-
-    //     const query = searchText
-    //       ? {
-    //           $or: [
-    //             { name: { $regex: searchText, $options: 'i' } },
-    //             { email: { $regex: searchText, $options: 'i' } },
-    //           ],
-    //         }
-    //       : {};
-
-    //     const [result, total] = await Promise.all([
-    //       usersCollection.find(query).skip(skip).limit(limit).toArray(),
-    //       usersCollection.countDocuments(query),
-    //     ]);
-
-    //     res.json({
-    //       users: result,
-    //       total,
-    //       page,
-    //       totalPages: Math.ceil(total / limit),
-    //     });
-    //   } catch (error) {
-    //     res
-    //       .status(500)
-    //       .json({ message: 'Search failed', error: error.message });
-    //   }
-    // });
 
     // get users role
     app.get('/users/role/:email', async (req, res) => {
@@ -270,22 +235,27 @@ async function run() {
 
     // get material data for specific session id
 
-    app.get('/material/:sessionId',verifyToken,verifyStudent, async (req, res) => {
-      const sessionId = req.params.sessionId;
+    app.get(
+      '/material/:sessionId',
+      verifyToken,
+      verifyStudent,
+      async (req, res) => {
+        const sessionId = req.params.sessionId;
 
-      try {
-        const result = await materialCollection
-          .find({ sessionId: sessionId })
-          .toArray();
+        try {
+          const result = await materialCollection
+            .find({ sessionId: sessionId })
+            .toArray();
 
-        if (result.length === 0) {
-          return res.status(404).send('No materials found for this session');
+          if (result.length === 0) {
+            return res.status(404).send('No materials found for this session');
+          }
+          res.send(result);
+        } catch (error) {
+          res.status(500).send('Server error');
         }
-        res.send(result);
-      } catch (error) {
-        res.status(500).send('Server error');
       }
-    });
+    );
 
     // delete material data for admin and tutor
     app.delete('/materials/:id', verifyToken, async (req, res) => {
@@ -296,7 +266,7 @@ async function run() {
     });
 
     // update materials
-    app.patch('/materials/:id',verifyToken,verifyTutor, async (req, res) => {
+    app.patch('/materials/:id', verifyToken, verifyTutor, async (req, res) => {
       const id = req.params.id;
       const updatedData = req.body;
       const query = { _id: new ObjectId(id) };
@@ -342,7 +312,7 @@ async function run() {
     });
 
     // booked session store data
-    app.post('/bookedSession',verifyToken,verifyStudent, async (req, res) => {
+    app.post('/bookedSession', verifyToken, verifyStudent, async (req, res) => {
       const data = req.body;
       const { sessionId, studentEmail } = data;
       const existingBooking = await bookedSessionCollection.findOne({
@@ -359,16 +329,21 @@ async function run() {
     });
 
     // get booked session data
-    app.get('/bookedSession/:email',verifyToken,verifyStudent, async (req, res) => {
-      const email = req.params.email;
-      const result = await bookedSessionCollection
-        .find({ studentEmail: email })
-        .toArray();
-      res.send(result);
-    });
+    app.get(
+      '/bookedSession/:email',
+      verifyToken,
+      verifyStudent,
+      async (req, res) => {
+        const email = req.params.email;
+        const result = await bookedSessionCollection
+          .find({ studentEmail: email })
+          .toArray();
+        res.send(result);
+      }
+    );
 
     // reviews and ratings
-    app.post('/reviews',verifyToken,verifyStudent, async (req, res) => {
+    app.post('/reviews', verifyToken, verifyStudent, async (req, res) => {
       const data = req.body;
       const result = await reviewCollection.insertOne(data);
       res.send(result);
@@ -379,7 +354,8 @@ async function run() {
       const sessionId = req.params.sessionId;
 
       try {
-        const result = await reviewCollection.find({ sessionId: sessionId })
+        const result = await reviewCollection
+          .find({ sessionId: sessionId })
           .toArray();
 
         if (result.length === 0) {
